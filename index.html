@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SenCache Comparison</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+
+  <style>
+      /* --- 3-COLUMN GRID FOR COMPARISON --- */
+      .video-compare-container {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0;
+        margin: 1.75rem 0 3rem 0;
+        align-items: stretch;
+      }
+      
+      @media (max-width: 960px) {
+        .video-compare-container {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      .video-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .video-item video {
+        width: 100%;
+        height: auto;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        object-fit: contain;
+        box-shadow: 0 18px 30px rgba(15, 23, 42, 0.12);
+        background: rgba(255, 255, 255, 0.7);
+        display: block;
+        margin: 0 auto;
+      }
+
+      .video-description {
+        margin: 0 0 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-transform: none;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .set-label {
+        margin: 2rem 0 0.25rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #0f172a;
+        letter-spacing: 0.08em;
+        text-align: center;
+      }
+
+      .set-difference {
+        font-weight: 700;
+      }
+  </style>
+</head>
+<body>
+
+<section class="hero title-section">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1">
+            SenCache: Accelerating Diffusion Model Inference<br>via Sensitivity-Aware Caching
+          </h1>
+
+          <!-- Author List -->
+          <div class="author-list">
+            <span class="author-name">Yasaman Haghighi</span>
+            <span class="author-name">Alexandre Alahi</span>
+          </div>
+
+          <!-- Affiliations -->
+          <div class="affiliations">
+            Ecole Polytechnique Fédérale de Lausanne (EPFL) 
+          </div>
+
+          <!-- Links -->
+          <div class="publication-links">
+            <div class="buttons is-centered">
+              <a class="button is-rounded" href="https://arxiv.org/abs/2602.24208">
+                <span class="icon">
+                  <i class="ai ai-arxiv"></i>
+                </span>
+                <span>Paper</span>
+              </a>
+              
+              <a class="button is-rounded" href="https://github.com/vita-epfl/SenCache">
+                <span class="icon">
+                  <i class="fab fa-github"></i>
+                </span>
+                <span>Code</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Abstract Section -->
+<section class="section">
+  <div class="container has-text-centered">
+    <h2 class="title is-2">Abstract</h2>
+    <p class="section-description">
+      Diffusion models achieve state-of-the-art video generation quality, but their inference remains expensive due to the large number of sequential denoising steps. This has motivated a growing line of research on accelerating diffusion inference. Among training-free acceleration methods, caching reduces computation by reusing previously computed model outputs across timesteps. Existing caching methods rely on heuristic criteria to choose cache/reuse timesteps and require extensive tuning. We address this limitation with a principled sensitivity-aware caching framework. Specifically, we formalize the caching error through an analysis of the model output sensitivity to perturbations in the denoising inputs, i.e., the noisy latent and the timestep, and show that this sensitivity is a key predictor of caching error. Based on this analysis, we propose <strong>Sensitivity-Aware Caching (SenCache)</strong>, a dynamic caching policy that adaptively selects caching timesteps on a per-sample basis. Our framework provides a theoretical basis for adaptive caching, explains why prior empirical heuristics can be partially effective, and extends them to a dynamic, sample-specific approach. Experiments on Wan 2.1, CogVideoX, and LTX-Video show that SenCache achieves better visual quality than existing caching methods under similar computational budgets.
+    </p>
+    
+    <!-- Figure -->
+    <div style="margin-top: 40px; max-width: 1000px; margin-left: auto; margin-right: auto;">
+      <figure class="pull-figure">
+        <div class="figure-triptych">
+          <img src="./figure2F.png" alt="SenCache caching criterion overview" loading="lazy">
+        </div>
+        <figcaption class="figure-caption">
+          <strong>SenCache uses sensitivity as a caching criterion.</strong> At each denoising step, if the changes in the noisy latent <em>x<sub>t</sub></em> and the sampling step <em>t</em> are sufficiently small such that the sensitivity score falls below <em>&epsilon;</em>, we reuse the cached denoiser output; otherwise, we refresh the cache at the current state. By skipping expensive denoiser evaluations when the output is expected to change minimally, SenCache accelerates diffusion-model inference.
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- Video Comparisons Section -->
+<section class="section">
+  <div class="container is-max-widescreen has-text-centered">
+    <h2 class="title is-2">Qualitative Comparisons</h2>
+    <p class="section-description">
+      Side-by-side comparison of videos generated with the Baseline, MagCache, and SenCache (Ours). All methods use the same prompt and share the same noise seed.
+    </p>
+
+    <p class="set-label"><span class="set-difference">Difference:</span> the dog and the vase</p>
+    <div class="video-compare-container">
+      <div class="video-item">
+        <p class="video-description">Baseline (CogVideoX)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./CogVid/0061_A black dog sits beside a red vase on a table.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">MagCache</p>
+        <video autoplay muted loop playsinline>
+          <source src="./CogVid/magcache_0061_A black dog sits beside a red vase on a table.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">SenCache (Ours)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./CogVid/0061_A black dog sits beside a red vase on a table_OurCache_S0005_M06_K3.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+    <p class="set-label"><span class="set-difference">Difference:</span> the character and the background</p>
+    <div class="video-compare-container">
+      <div class="video-item">
+        <p class="video-description">Baseline (LTX-Video)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./ltx/baseline_0635_Gwen Stacy reading a book zoom out.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">MagCache</p>
+        <video autoplay muted loop playsinline>
+          <source src="./ltx/magcache_0635_Gwen Stacy reading a book zoom out_E00005_K2_R02.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">SenCache (Ours)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./ltx/mycache_0635_Gwen Stacy reading a book zoom out_S001_M07_R002.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+    <p class="set-label"><span class="set-difference">Difference:</span> the bird has a third wing in the middle video</p>
+    <div class="video-compare-container">
+      <div class="video-item">
+        <p class="video-description">Baseline (WAN 2.1)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/baseline/0656_The camera starts with an aerial view of a tropica.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">MagCache</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/magcache/0656_The camera starts with an aerial view of a tropica_E012_K4_R02.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">SenCache (Ours)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/ours/0656_The camera starts with an aerial view of a tropica_OurCache_S0005_M013_K3.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+    <p class="set-label"><span class="set-difference">Difference:</span> the treasurer</p>
+    <div class="video-compare-container">
+      <div class="video-item">
+        <p class="video-description">Baseline (WAN 2.1)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/baseline/0177_An ancient tomb long abandoned became a target for.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">MagCache</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/magcache/0177_An ancient tomb long abandoned became a target for_E012_K4_R02.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">SenCache (Ours)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/ours/0177_An ancient tomb long abandoned became a target for_OurCache_S0005_M013_K3.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+    <p class="set-label"><span class="set-difference">Difference:</span> the building</p>
+    <div class="video-compare-container">
+      <div class="video-item">
+        <p class="video-description">Baseline (WAN 2.1)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/baseline/0922_The camera orbits around Statue of Liberty the cam.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">MagCache</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/magcache/0922_The camera orbits around Statue of Liberty the cam_E012_K4_R02.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">SenCache (Ours)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/ours/0922_The camera orbits around Statue of Liberty the cam_OurCache_S0005_M013_K3.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+    <p class="set-label"><span class="set-difference">Difference:</span> the mountaineer</p>
+    <div class="video-compare-container">
+      <div class="video-item">
+        <p class="video-description">Baseline (WAN 2.1)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/baseline/0042_A person climbing a vertical rock face searching f.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">MagCache</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/magcache/0042_A person climbing a vertical rock face searching f_E012_K4_R02.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">SenCache (Ours)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/ours/0042_A person climbing a vertical rock face searching f_OurCache_S0005_M012_K3.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+    <p class="set-label"><span class="set-difference">Difference:</span> the shoes</p>
+    <div class="video-compare-container">
+      <div class="video-item">
+        <p class="video-description">Baseline (WAN 2.1)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/baseline/0105_a snowboard and a sports ball.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">MagCache</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/magcache/0105_a snowboard and a sports ball_E012_K4_R02.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">SenCache (Ours)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/ours/0105_a snowboard and a sports ball_OurCache_S0005_M013_K3.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+    <p class="set-label"><span class="set-difference">Difference:</span> the roof of the chalet</p>
+    <div class="video-compare-container">
+      <div class="video-item">
+        <p class="video-description">Baseline (WAN 2.1)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/baseline/0014_A detailed shot of an avalanche of snow rushing do.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">MagCache</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/magcache/0014_A detailed shot of an avalanche of snow rushing do_E012_K4_R02.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">SenCache (Ours)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/ours/0014_A detailed shot of an avalanche of snow rushing do_OurCache_S0005_M013_K3.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+    <p class="set-label"><span class="set-difference">Difference:</span> the airplane in the background</p>
+    <div class="video-compare-container">
+      <div class="video-item">
+        <p class="video-description">Baseline (WAN 2.1)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/baseline/0150_a bicycle and an airplane.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">MagCache</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/magcache/0150_a bicycle and an airplane_E012_K4_R02.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">SenCache (Ours)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/ours/0150_a bicycle and an airplane_OurCache_S0005_M013_K3.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+    <p class="set-label"><span class="set-difference">Difference:</span> the parrot</p>
+    <div class="video-compare-container">
+      <div class="video-item">
+        <p class="video-description">Baseline (LTX-Video)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./ltx/baseline_0063_Green parrot perching on a brown chair.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">MagCache</p>
+        <video autoplay muted loop playsinline>
+          <source src="./ltx/magcache_0063_Green parrot perching on a brown chair_E00005_K2_R02.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">SenCache (Ours)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./ltx/mycache_0063_Green parrot perching on a brown chair_S001_M07_R002.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+    <p class="set-label"><span class="set-difference">Difference:</span> the eyes of the pinguin</p>
+    <div class="video-compare-container">
+      <div class="video-item">
+        <p class="video-description">Baseline (CogVideoX)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./CogVid/0048_A penguin standing on the left side of a cactus in.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">MagCache</p>
+        <video autoplay muted loop playsinline>
+          <source src="./CogVid/magcache_0048_A penguin standing on the left side of a cactus in.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">SenCache (Ours)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./CogVid/0048_A penguin standing on the left side of a cactus in_OurCache_S0005_M06_K3.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+    <p class="set-label"><span class="set-difference">Difference:</span> the color of the woman's top</p>
+    <div class="video-compare-container">
+      <div class="video-item">
+        <p class="video-description">Baseline (WAN 2.1)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/baseline/0013_A woman is running.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">MagCache</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/magcache/0013_A woman is running_E012_K4_R02.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">SenCache (Ours)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/ours/0013_A woman is running_OurCache_S0005_M013_K3.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+    <p class="set-label"><span class="set-difference">Difference:</span> the brand of the machine</p>
+    <div class="video-compare-container">
+      <div class="video-item">
+        <p class="video-description">Baseline (WAN 2.1)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/baseline/0901_a hair drier on the right of a toothbrush front vi.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">MagCache</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/magcache/0901_a hair drier on the right of a toothbrush front vi_E012_K4_R02.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-item">
+        <p class="video-description">SenCache (Ours)</p>
+        <video autoplay muted loop playsinline>
+          <source src="./static/videos/Wan/ours/0901_a hair drier on the right of a toothbrush front vi_OurCache_S0005_M013_K3.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Citation Section -->
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop">
+    <h2 class="title is-2 has-text-centered">Citation</h2>
+    <p class="section-description has-text-centered">
+      If you find SenCache useful, please cite our work.
+    </p>
+    <pre class="box">
+@article{haghighi2026sencache,
+  title={SenCache: Accelerating Diffusion Model Inference via Sensitivity-Aware Caching},
+  author={Haghighi, Yasaman and Alahi, Alexandre},
+  journal={arXiv preprint arXiv:2602.24208},
+  year={2026}
+}
+    </pre>
+  </div>
+</section>
+
+</body>
+</html>
